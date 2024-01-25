@@ -29,8 +29,8 @@ public class Vectors : MonoBehaviour
         DrawVector(new Vector3(3, 3, 0), new Vector3(4, 3, 0), Color.magenta);
 
         Gizmos.color = Color.white;
-        Gizmos.DrawWireSphere(this.transform.position, 2);
-        DrawVector(this.transform.position, target.transform.position, Color.black);
+        Gizmos.DrawWireSphere(transform.position, 1);
+        DrawVector(transform.position, target.transform.position - transform.position, Color.black);
     }
 
     
