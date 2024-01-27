@@ -140,7 +140,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0905079f9ee47db46b0caed74d913172, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  easeType: 0
+  moveEaseType: 27
+  rotationEaseType: 10
+  recoilTime: 0.2
+  recoilMoveAmount: 0.05
+  recoilRotationAmount: 2
 --- !u!1 &476061382
 GameObject:
   m_ObjectHideFlags: 0
@@ -451,7 +455,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 27c3271c57d4bd34096e5ee6a63c843e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 0.12
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 27c3271c57d4bd34096e5ee6a63c843e, type: 3}
       propertyPath: m_LocalRotation.w
@@ -623,13 +627,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: -0, y: -0.7021112, z: -0, w: 0.7120673}
+  m_LocalPosition: {x: 1.04, y: 0.12, z: 0.11}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -89.193, z: 0}
 --- !u!1 &1008463026
 GameObject:
   m_ObjectHideFlags: 0
