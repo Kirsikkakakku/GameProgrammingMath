@@ -170,7 +170,7 @@ Transform:
   m_GameObject: {fileID: 435992845}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.32, y: 0, z: -3.12}
+  m_LocalPosition: {x: -3.08, y: 0, z: -8.83}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -207,9 +207,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 441328465}
   npc: {fileID: 861054778}
-  lookTarget: {fileID: 435992845}
-  AngleThreshold: -31
-  LookDistance: 4
+  lookAt: {fileID: 435992845}
+  AngleThreshold: 45
   Radius: 5
   Height: 2
 --- !u!4 &441328467
@@ -221,7 +220,7 @@ Transform:
   m_GameObject: {fileID: 441328465}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -8.12, y: 0, z: 4.66}
+  m_LocalPosition: {x: -2.5, y: 0.03, z: -10.37}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -608,7 +607,7 @@ Transform:
   m_GameObject: {fileID: 861054778}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.24, y: 0, z: 5.62}
+  m_LocalPosition: {x: -1.41, y: 0, z: -3.97}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

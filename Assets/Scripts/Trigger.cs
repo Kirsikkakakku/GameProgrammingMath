@@ -7,36 +7,23 @@ public class Trigger : MonoBehaviour
 {
     [SerializeField] private GameObject player;
     [SerializeField] private GameObject npc;
-    [SerializeField] private GameObject lookTarget;
+    [SerializeField] private GameObject lookAt;
 
     [Range(-180, 180)]
     public float AngleThreshold = 30f;
-    public float LookDistance = 6f;
     public float Radius = 4f;
     public float Height = 2f;
-
-
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     private void OnDrawGizmos()
     {
         Vector3 playerPos = player.transform.position;
         Vector3 npcPos = npc.transform.position;
-        Vector3 target = lookTarget.transform.position;
+        Vector3 lookingAt = lookAt.transform.position;
 
         Drawing.DrawVector(Vector3.zero, playerPos - Vector3.zero, Color.white);
         Drawing.DrawVector(Vector3.zero, npcPos - Vector3.zero, Color.white);
 
-        //Radial trigget
+        //Radial trigger
         /*if ((playerPos - npcPos).magnitude < Radius)
         {
             Handles.color = Color.red;
@@ -50,25 +37,25 @@ public class Trigger : MonoBehaviour
             Drawing.DrawVector(npcPos, playerPos - npcPos, Color.green);
         }*/
 
-        Handles.color = Color.green;
-
         //Handles.DrawWireDisc(npcPos + new Vector3(0, HeightTreshold/2, 0), Vector3.up, Radius);
         //Handles.DrawWireDisc(npcPos - new Vector3(0, HeightTreshold / 2, 0), Vector3.up, Radius);
 
         //Look-at trigger
 
-        Vector3 lookDir = target - npcPos;
+        Vector3 lookDir = lookingAt - npcPos;
 
-        Vector3 lookVector = Vector3.Normalize(target-npcPos);
-        Vector3 playerVector = Vector3.Normalize(playerPos-target);
+        Vector3 lookVector = Vector3.Normalize(npcPos-lookingAt);
+        Vector3 playerVector = Vector3.Normalize(npcPos-playerPos);
 
         float dotProductTreshold = Mathf.Cos(Mathf.Deg2Rad * AngleThreshold);
 
         float dotProduct = Vector3.Dot(lookVector, playerVector);
 
+        bool isLooking = dotProduct > dotProductTreshold;
+
         Drawing.DrawVector(npcPos, lookDir, Color.blue);
 
-        if (dotProduct > dotProductTreshold)
+        if (isLooking)
         {
             Drawing.DrawVector(npcPos, lookDir, Color.red);
         }
@@ -76,25 +63,58 @@ public class Trigger : MonoBehaviour
         {
             Drawing.DrawVector(npcPos, lookDir, Color.blue);
         }
-
+        
         //Wedge trigger
 
+        //Upper and lower height limit center points
         Vector3 upperMiddle = npcPos + Height / 2 * Vector3.up;
         Vector3 lowerMiddle = npcPos - Height / 2 * Vector3.up;
 
-
-        Handles.color = Color.white;
-        //Handles.DrawWireDisc(upperMiddle, Vector3.up, Radius);
-        //Handles.DrawWireDisc(lowerMiddle, Vector3.up, Radius);
-
         Quaternion posRot = Quaternion.Euler(0f, AngleThreshold, 0f);
-        Vector3 rotatedPos = posRot * lookVector;
+        Vector3 rotatedPos = posRot * lookDir.normalized;
         Drawing.DrawVector(npcPos, rotatedPos * Radius, Color.magenta);
 
         Quaternion negRot = Quaternion.Euler(0f, -AngleThreshold, 0f);
-        Vector3 rotatedNeg = negRot * lookVector;
+        Vector3 rotatedNeg = negRot * lookDir.normalized;
         Drawing.DrawVector(npcPos, rotatedNeg * Radius, Color.magenta);
 
+        
+        //Check if player height is within npc height-limit
+        if (playerPos.y < Height/2 && playerPos.y > -Height / 2)
+        {
+            //Origin for the radial trigger at player height 
+            Vector3 radialOrigin = new Vector3(npcPos.x, playerPos.y, npcPos.z);
+
+            //Radial trigger
+            bool withinRadius = (playerPos - radialOrigin).magnitude < Radius;
+
+            //If player is within both the radial trigger and the look-at trigger, player is within the wedge
+            if (isLooking && withinRadius)
+            {
+                Drawing.DrawVector(npcPos, playerPos - npcPos, Color.red);
+                //Set wedge color
+                Handles.color = Color.red;
+                Gizmos.color = Color.red;
+            }
+            else
+            {
+                Drawing.DrawVector(npcPos, playerPos - npcPos, Color.green);
+                //Set wedge color
+                Handles.color = Color.white;
+                Handles.color = Color.white;
+            }
+        }
+
+        else
+        {
+            Drawing.DrawVector(npcPos, playerPos - npcPos, Color.green);
+            //Set wedge color
+            Handles.color = Color.white;
+            Gizmos.color = Color.white;
+        }
+        
+
+        //Draw the wedge
         Gizmos.DrawLine(upperMiddle, upperMiddle + rotatedPos * Radius);
         Gizmos.DrawLine(lowerMiddle, lowerMiddle + rotatedPos * Radius);
 
@@ -106,26 +126,10 @@ public class Trigger : MonoBehaviour
 
         Gizmos.DrawLine(upperMiddle, lowerMiddle);
 
-        Handles.color = Color.white;
-        Handles.DrawWireArc(upperMiddle, Vector3.up, lookVector*Radius, AngleThreshold, Radius);
-        Handles.DrawWireArc(upperMiddle, Vector3.up, lookVector * Radius, -AngleThreshold, Radius);
+        Handles.DrawWireArc(upperMiddle, Vector3.up, lookDir.normalized * Radius, AngleThreshold, Radius);
+        Handles.DrawWireArc(upperMiddle, Vector3.up, lookDir.normalized * Radius, -AngleThreshold, Radius);
 
-        Handles.DrawWireArc(lowerMiddle, Vector3.up, lookVector * Radius, AngleThreshold, Radius);
-        Handles.DrawWireArc(lowerMiddle, Vector3.up, lookVector * Radius, -AngleThreshold, Radius);
-
-        if ((playerPos.y < Height / 2 || playerPos.y > Height / 2 * -1) && ((playerPos - npcPos).magnitude < Radius) && dotProduct > dotProductTreshold)
-        {
-            Handles.color = Color.red;
-            Handles.DrawWireDisc(npcPos, Vector3.up, Radius);
-            Drawing.DrawVector(npcPos, playerPos - npcPos, Color.red);
-        }
-        else
-        {
-            Handles.color = Color.green;
-            Handles.DrawWireDisc(npcPos, Vector3.up, Radius);
-            Drawing.DrawVector(npcPos, playerPos - npcPos, Color.green);
-        }
-
-        //Gizmos.DrawLine(lowerLimit, lookVector * Radius);
+        Handles.DrawWireArc(lowerMiddle, Vector3.up, lookDir.normalized * Radius, AngleThreshold, Radius);
+        Handles.DrawWireArc(lowerMiddle, Vector3.up, lookDir.normalized * Radius, -AngleThreshold, Radius);
     }
 }
