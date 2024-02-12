@@ -8,8 +8,11 @@ public class EasingAnimation : MonoBehaviour
     private EasingFunction.Function rotationEasingFunction;
     public EasingFunction.Ease moveEaseType;
     public EasingFunction.Ease rotationEaseType;
+    //Recoil duration
     public float recoilTime = 0.2f;
+    //How much gun moves backwards with each shot
     public float recoilMoveAmount = 0.2f;
+    //How much gun rotates with each shot
     public float recoilRotationAmount = 10f;
 
     private Vector3 originalPos;
@@ -22,15 +25,12 @@ public class EasingAnimation : MonoBehaviour
     private float elapsedTime = 0f;
     private bool recoiling = false;
 
-
-    // Start is called before the first frame update
     void Start()
     {
         originalPos = transform.position;
         originalRot = transform.rotation.eulerAngles;
     }
 
-    // Update is called once per frame
     void Update()
     {
         timeSinceLastShot += Time.deltaTime;
@@ -44,6 +44,7 @@ public class EasingAnimation : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Mouse0) && timeSinceLastShot >= cooldown && recoiling == false)
         {
             recoiling = true;
+            //Set new origin and rotation
             originalPos = transform.position;
             originalRot = transform.rotation.eulerAngles;
             Debug.Log(originalRot);
