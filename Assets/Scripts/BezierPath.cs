@@ -39,6 +39,7 @@ public class BezierPath : MonoBehaviour
     private int counter = 0;
 
     public bool DrawLines = true;
+    public bool DrawBezier = true;
 
     OrientedPoint GetOrientedPoint(float t, Vector3 anc1, Vector3 ctrl1, Vector3 ctrl2, Vector3 anc2)
     {
@@ -67,7 +68,7 @@ public class BezierPath : MonoBehaviour
 
     private void Update()
     {
-        t += Time.deltaTime;
+        //t += Time.deltaTime;
 
         GetBezierPointAndRotation();
     }
@@ -101,6 +102,7 @@ public class BezierPath : MonoBehaviour
 
         List<Vector3> vertices = new List<Vector3>();
         List<Vector3> normals = new List<Vector3>();
+        List<Vector2> uvs = new List<Vector2>();
         List<int> triangles = new List<int>();
 
         for (int i = 0; i < n - 1; i++)
@@ -111,7 +113,7 @@ public class BezierPath : MonoBehaviour
             Vector3 firstControl = points[i].GetSecondControlPoint();
             Vector3 secondControl = points[i + 1].GetFirstControlPoint();
 
-            Handles.DrawBezier(firstAnchor, secondAnchor, firstControl, secondControl, Color.green, null, 3);
+            if (DrawBezier)  Handles.DrawBezier(firstAnchor, secondAnchor, firstControl, secondControl, Color.green, null, 3);
         }
 
         if (closed)
@@ -122,7 +124,7 @@ public class BezierPath : MonoBehaviour
             Vector3 firstControl = points[n - 1].GetSecondControlPoint();
             Vector3 secondControl = points[0].GetFirstControlPoint();
 
-            Handles.DrawBezier(firstAnchor, secondAnchor, firstControl, secondControl, Color.green, null, 3);
+            if (DrawBezier) Handles.DrawBezier(firstAnchor, secondAnchor, firstControl, secondControl, Color.green, null, 3);
         }
 
         for (int segment = 0; segment <= segments - 1; segment++)
@@ -130,6 +132,7 @@ public class BezierPath : MonoBehaviour
 
             float TSegment = (float)segment / segments;
             float TSegmentNext = (float)(segment + 1) / segments;
+            if (segment == segments - 1) TSegmentNext = 0;
 
             int segStart = Mathf.FloorToInt(TSegment * n);
             int segStartNext = Mathf.FloorToInt(TSegmentNext * n);
@@ -180,11 +183,17 @@ public class BezierPath : MonoBehaviour
             OrientedPoint op = GetOrientedPoint(tActual, anchor1, anchor2, anchor3, anchor4);
             OrientedPoint opNext = GetOrientedPoint(tActualNext, anchorNext1, anchorNext2, anchorNext3, anchorNext4);
 
-            obj.transform.position = op.Position;
-            obj.transform.rotation = op.Rotation;
+            if (obj)
+            {
+                obj.transform.position = op.Position;
+                obj.transform.rotation = op.Rotation;
+            }
 
-            obj1.transform.position = opNext.Position;
-            obj1.transform.rotation = opNext.Rotation;
+            /*if (obj1)
+            {
+                obj1.transform.position = opNext.Position;
+                obj1.transform.rotation = opNext.Rotation;
+            }*/
 
             //Handles.PositionHandle(op.Position, op.Rotation;
 
@@ -197,6 +206,10 @@ public class BezierPath : MonoBehaviour
                 vertices.Add(vertsNext[i]);
                 normals.Add(op.LocalToWorldVector(shape2D.vertices[i].normal * roadScale));
                 normals.Add(op.LocalToWorldVector(shape2D.vertices[i + 1].normal * roadScale));
+                //The uvs don't work perfectly, problems can be seen around the anchor points
+                //where it seems to map a whole texture within one segment
+                uvs.Add(new Vector2(shape2D.vertices[i].u, tActual));
+                uvs.Add(new Vector2(shape2D.vertices[i + 1].u, tActualNext));
             }
 
             if (DrawLines)
@@ -215,58 +228,6 @@ public class BezierPath : MonoBehaviour
                     Handles.color = Color.red;
                 }
             }
-
-            // Triangles
-            /*for (int i = 0; i < shape2D.vertices.Length - 2; i += 2)
-            {
-                // hack hack
-                if (segment == segments-1)
-                {
-                    break;
-                }
-                
-
-                int first_start = segment * shape2D.vertices.Length + i;
-                int first_end = first_start + 1;
-
-
-                int second_start = first_start + shape2D.vertices.Length;
-                int second_end = first_end + shape2D.vertices.Length;
-
-                Debug.LogWarning(first_start + ", " + first_end + ", " + vertices.Count);
-
-                Debug.LogWarning(second_start + ", " + second_end + ", " + vertices.Count);
-
-                // 1st triangle
-                triangles.Add(first_start);
-                triangles.Add(second_start);
-                triangles.Add(second_end);
-
-                // 2nd triangle
-                triangles.Add(first_start);
-                triangles.Add(second_end);
-                triangles.Add(first_end);
-            }*/
-
-            /*if (segment < segments)
-            {
-                // Special case, loop around the 2D mesh
-                int index_start = segment * shape2D.vertices.Length + 15;
-                int index_end = segment * shape2D.vertices.Length;
-
-                int next_start = (segment + 1) * shape2D.vertices.Length + 15;
-                int next_end = (segment + 1) * shape2D.vertices.Length;
-
-                // 1st triangle
-                triangles.Add(index_start);
-                triangles.Add(next_start);
-                triangles.Add(next_end);
-
-                // 2nd triangle
-                triangles.Add(index_start);
-                triangles.Add(next_end);
-                triangles.Add(index_end);
-            }*/
         }
 
         for (int ring = 0; ring <= segments - 1; ring++)
@@ -296,7 +257,7 @@ public class BezierPath : MonoBehaviour
         mesh.SetVertices(vertices);
         mesh.SetTriangles(triangles, 0);
         mesh.SetNormals(normals);
-        mesh.RecalculateNormals();
+        mesh.SetUVs(0, uvs);
 
         meshFilter.sharedMesh = mesh;
     }
