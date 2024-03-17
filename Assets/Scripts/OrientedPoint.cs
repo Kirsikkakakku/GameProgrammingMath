@@ -13,8 +13,13 @@ public struct OrientedPoint
         Rotation = rot;
     }
 
-    public Vector3 LocalToWorld(Vector3 local)
+    public Vector3 LocalToWorldPosition(Vector3 localSpacePos)
     {
-        return Position + Rotation * local;
+        return Position + Rotation * localSpacePos;
+    }
+
+    public Vector3 LocalToWorldVector(Vector3 localSpacePos)
+    {
+        return Rotation * localSpacePos;
     }
 }
