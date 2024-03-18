@@ -23,6 +23,7 @@ public class BezierPath : MonoBehaviour
     private Quaternion rotation;
 
     private Vector3 anchor1, anchor2, anchor3, anchor4, anchorNext1, anchorNext2, anchorNext3, anchorNext4;
+    private Vector3 anc1, anc2, anc3, anc4;
 
     [Range(3, 255)]
     public int segments = 32;
@@ -34,12 +35,19 @@ public class BezierPath : MonoBehaviour
 
     public float roadScale = 1f;
 
+    public bool Loop = true;
+
     private int x = 1;
 
     private int counter = 0;
 
     public bool DrawLines = true;
     public bool DrawBezier = true;
+
+    public float lapTime = 10f;
+
+    private float tIncrease = 0f;
+    private float interpolation = 0f;
 
     OrientedPoint GetOrientedPoint(float t, Vector3 anc1, Vector3 ctrl1, Vector3 ctrl2, Vector3 anc2)
     {
@@ -60,15 +68,16 @@ public class BezierPath : MonoBehaviour
 
     private void Start()
     {
-        anchor1 = points[0].GetAnchorPoint();
-        anchor2 = points[0].GetSecondControlPoint();
-        anchor3 = points[1].GetFirstControlPoint();
-        anchor4 = points[1].GetAnchorPoint();
+        anc1 = points[0].GetAnchorPoint();
+        anc2 = points[0].GetSecondControlPoint();
+        anc3 = points[1].GetFirstControlPoint();
+        anc4 = points[1].GetAnchorPoint();
     }
 
     private void Update()
     {
-        //t += Time.deltaTime;
+        interpolation += Time.deltaTime;
+        t = Mathf.Lerp(0, 1, interpolation / (lapTime / points.Length));
 
         GetBezierPointAndRotation();
     }
@@ -116,7 +125,7 @@ public class BezierPath : MonoBehaviour
             if (DrawBezier)  Handles.DrawBezier(firstAnchor, secondAnchor, firstControl, secondControl, Color.green, null, 3);
         }
 
-        if (closed)
+        if (Loop)
         {
             Vector3 firstAnchor = points[n - 1].GetAnchorPoint();
             Vector3 secondAnchor = points[0].GetAnchorPoint();
@@ -132,28 +141,50 @@ public class BezierPath : MonoBehaviour
 
             float TSegment = (float)segment / segments;
             float TSegmentNext = (float)(segment + 1) / segments;
-            if (segment == segments - 1) TSegmentNext = 0;
+            if (segment == segments - 1 && Loop) TSegmentNext = 0;
 
-            int segStart = Mathf.FloorToInt(TSegment * n);
-            int segStartNext = Mathf.FloorToInt(TSegmentNext * n);
+            int segStart = Mathf.FloorToInt(TSegment * nSegments);
+            int segStartNext = Mathf.FloorToInt(TSegmentNext * nSegments);
 
-            if (segStart >= n)
+            if (Loop)
+            {
+                segStart = Mathf.FloorToInt(TSegment * n);
+                segStartNext = Mathf.FloorToInt(TSegmentNext * n);
+            }
+
+            if (segStart >= nSegments && !Loop)
+            {
+                segStart = nSegments - 1;
+            }
+
+            if (segStartNext >= nSegments && !Loop)
+            {
+                segStartNext = nSegments - 1;
+            }
+
+            if (segStart >= n && Loop)
             {
                 segStart = n - 1;
             }
 
-            if (segStartNext >= n)
+            if (segStartNext >= n && Loop)
             {
                 segStartNext = n - 1;
             }
 
-            float tActual = (float)n * TSegment - segStart * 1.0f;
-            float tActualNext = n * TSegmentNext - segStartNext * 1.0f;
+            float tActual = (float)nSegments * TSegment - segStart * 1.0f;
+            float tActualNext = nSegments * TSegmentNext - segStartNext * 1.0f;
+
+            if (Loop)
+            {
+                tActual = (float)n * TSegment - segStart * 1.0f;
+                tActualNext = n * TSegmentNext - segStartNext * 1.0f;
+            }
 
             anchor1 = points[segStart].GetAnchorPoint();
             anchor2 = points[segStart].GetSecondControlPoint();
 
-            if (segStart + 1 >= n)
+            if (segStart >= nSegments && Loop)
             {
                 anchor3 = points[0].GetFirstControlPoint();
                 anchor4 = points[0].GetAnchorPoint();
@@ -168,7 +199,8 @@ public class BezierPath : MonoBehaviour
             anchorNext1 = points[segStartNext].GetAnchorPoint();
             anchorNext2 = points[segStartNext].GetSecondControlPoint();
 
-            if (segStartNext + 1 >= n)
+
+            if (segStartNext >= nSegments && Loop)
             {
                 anchorNext3 = points[0].GetFirstControlPoint();
                 anchorNext4 = points[0].GetAnchorPoint();
@@ -183,20 +215,6 @@ public class BezierPath : MonoBehaviour
             OrientedPoint op = GetOrientedPoint(tActual, anchor1, anchor2, anchor3, anchor4);
             OrientedPoint opNext = GetOrientedPoint(tActualNext, anchorNext1, anchorNext2, anchorNext3, anchorNext4);
 
-            if (obj)
-            {
-                obj.transform.position = op.Position;
-                obj.transform.rotation = op.Rotation;
-            }
-
-            /*if (obj1)
-            {
-                obj1.transform.position = opNext.Position;
-                obj1.transform.rotation = opNext.Rotation;
-            }*/
-
-            //Handles.PositionHandle(op.Position, op.Rotation;
-
             Vector3[] verts = shape2D.vertices.Select(v => op.LocalToWorldPosition(v.point * roadScale)).ToArray();
             Vector3[] vertsNext = shape2D.vertices.Select(vNext => opNext.LocalToWorldPosition(vNext.point * roadScale)).ToArray();
 
@@ -206,17 +224,26 @@ public class BezierPath : MonoBehaviour
                 vertices.Add(vertsNext[i]);
                 normals.Add(op.LocalToWorldVector(shape2D.vertices[i].normal * roadScale));
                 normals.Add(op.LocalToWorldVector(shape2D.vertices[i + 1].normal * roadScale));
-                //The uvs don't work perfectly, problems can be seen around the anchor points
-                //where it seems to map a whole texture within one segment
-                uvs.Add(new Vector2(shape2D.vertices[i].u, tActual));
-                uvs.Add(new Vector2(shape2D.vertices[i + 1].u, tActualNext));
+                uvs.Add(new Vector2(shape2D.vertices[i].u, TSegment));
+                uvs.Add(new Vector2(shape2D.vertices[i + 1].u, TSegmentNext));
             }
 
             if (DrawLines)
             {
-                for (int i = 0; i < vertices.Count; i += 2)
+                if (Loop)
                 {
-                    Handles.DrawLine(vertices[i], vertices[i + 1]);
+                    for (int i = 0; i < vertices.Count; i += 2)
+                    {
+                        Handles.DrawLine(vertices[i], vertices[i + 1]);
+                    }
+                }
+
+                else
+                {
+                    for (int i = 0; i < vertices.Count-16; i += 2)
+                    {
+                        Handles.DrawLine(vertices[i], vertices[i + 1]);
+                    }
                 }
 
                 for (int i = 0; i < shape2D.lineIndices.Length; i += 2)
@@ -232,10 +259,12 @@ public class BezierPath : MonoBehaviour
 
         for (int ring = 0; ring <= segments - 1; ring++)
         {
+            if (ring == segments) break;
             int rootIndex = ring * shape2D.vertices.Length;
             int rootIndexNext = (ring + 1) * shape2D.vertices.Length;
             //Special case for the last segment
-            if (ring == segments - 1) rootIndexNext = 0;
+            if (ring == segments - 1 && Loop) rootIndexNext = 0;
+            if (ring == segments - 1 && !Loop) return;
 
             for (int line = 0; line < shape2D.lineIndices.Length; line += 2)
             {
@@ -267,31 +296,32 @@ public class BezierPath : MonoBehaviour
         if (t >= 1)
         {
             t = 0;
+            interpolation = 0;
 
             if (x == points.Length - 1)
             {
-                anchor1 = points[x].GetAnchorPoint();
-                anchor2 = points[x].GetSecondControlPoint();
-                anchor3 = points[0].GetFirstControlPoint();
-                anchor4 = points[0].GetAnchorPoint();
+                anc1 = points[x].GetAnchorPoint();
+                anc2 = points[x].GetSecondControlPoint();
+                anc3 = points[0].GetFirstControlPoint();
+                anc4 = points[0].GetAnchorPoint();
 
                 x = 0;
             }
 
             else
             {
-                anchor1 = points[x].GetAnchorPoint();
-                anchor2 = points[x].GetSecondControlPoint();
-                anchor3 = points[x + 1].GetFirstControlPoint();
-                anchor4 = points[x + 1].GetAnchorPoint();
+                anc1 = points[x].GetAnchorPoint();
+                anc2 = points[x].GetSecondControlPoint();
+                anc3 = points[x + 1].GetFirstControlPoint();
+                anc4 = points[x + 1].GetAnchorPoint();
 
                 x += 1;
             }
         }
 
-        Vector3 point1 = Vector3.Lerp(anchor1, anchor2, t);
-        Vector3 point2 = Vector3.Lerp(anchor2, anchor3, t);
-        Vector3 point3 = Vector3.Lerp(anchor3, anchor4, t);
+        Vector3 point1 = Vector3.Lerp(anc1, anc2, t);
+        Vector3 point2 = Vector3.Lerp(anc2, anc3, t);
+        Vector3 point3 = Vector3.Lerp(anc3, anc4, t);
 
         Vector3 point4 = Vector3.Lerp(point1, point2, t);
         Vector3 point5 = Vector3.Lerp(point2, point3, t);
