@@ -19,16 +19,11 @@ public class BezierPath : MonoBehaviour
     [SerializeField] private Mesh mesh;
     [SerializeField] private MeshFilter meshFilter;
 
-    private Vector3 point;
-    private Quaternion rotation;
-
     private Vector3 anchor1, anchor2, anchor3, anchor4, anchorNext1, anchorNext2, anchorNext3, anchorNext4;
     private Vector3 anc1, anc2, anc3, anc4;
 
     [Range(3, 255)]
-    public int segments = 32;
-
-    public bool closed = false;
+    public int Segments = 32;
 
     [Range(0, 1)]
     public float t = 0f;
@@ -39,14 +34,11 @@ public class BezierPath : MonoBehaviour
 
     private int x = 1;
 
-    private int counter = 0;
-
     public bool DrawLines = true;
     public bool DrawBezier = true;
 
     public float lapTime = 10f;
 
-    private float tIncrease = 0f;
     private float interpolation = 0f;
 
     OrientedPoint GetOrientedPoint(float t, Vector3 anc1, Vector3 ctrl1, Vector3 ctrl2, Vector3 anc2)
@@ -81,19 +73,6 @@ public class BezierPath : MonoBehaviour
 
         GetBezierPointAndRotation();
     }
-
-    /*private void OnValidate()
-    {
-        anchor1 = points[0].GetAnchorPoint();
-        anchor2 = points[0].GetSecondControlPoint();
-        anchor3 = points[1].GetFirstControlPoint();
-        anchor4 = points[1].GetAnchorPoint();
-
-        OrientedPoint op = GetOrientedPoint(t, anchor1, anchor2, anchor3, anchor4);
-        
-        obj.transform.position = op.Position;
-        obj.transform.rotation = op.Rotation;
-    }*/
 
     private void OnDrawGizmos()
     {
@@ -136,12 +115,12 @@ public class BezierPath : MonoBehaviour
             if (DrawBezier) Handles.DrawBezier(firstAnchor, secondAnchor, firstControl, secondControl, Color.green, null, 3);
         }
 
-        for (int segment = 0; segment <= segments - 1; segment++)
+        for (int segment = 0; segment <= Segments - 1; segment++)
         {
 
-            float TSegment = (float)segment / segments;
-            float TSegmentNext = (float)(segment + 1) / segments;
-            if (segment == segments - 1 && Loop) TSegmentNext = 0;
+            float TSegment = (float)segment / Segments;
+            float TSegmentNext = (float)(segment + 1) / Segments;
+            if (segment == Segments - 1 && Loop) TSegmentNext = 0;
 
             int segStart = Mathf.FloorToInt(TSegment * nSegments);
             int segStartNext = Mathf.FloorToInt(TSegmentNext * nSegments);
@@ -257,14 +236,13 @@ public class BezierPath : MonoBehaviour
             }
         }
 
-        for (int ring = 0; ring <= segments - 1; ring++)
+        for (int ring = 0; ring <= Segments - 1; ring++)
         {
-            if (ring == segments) break;
             int rootIndex = ring * shape2D.vertices.Length;
             int rootIndexNext = (ring + 1) * shape2D.vertices.Length;
             //Special case for the last segment
-            if (ring == segments - 1 && Loop) rootIndexNext = 0;
-            if (ring == segments - 1 && !Loop) return;
+            if (ring == Segments - 1 && Loop) rootIndexNext = 0;
+            if (ring == Segments - 1 && !Loop) break;
 
             for (int line = 0; line < shape2D.lineIndices.Length; line += 2)
             {
@@ -283,9 +261,12 @@ public class BezierPath : MonoBehaviour
             }
         }
 
+
+
         mesh.SetVertices(vertices);
         mesh.SetTriangles(triangles, 0);
         mesh.SetNormals(normals);
+        mesh.RecalculateNormals();
         mesh.SetUVs(0, uvs);
 
         meshFilter.sharedMesh = mesh;
