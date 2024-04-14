@@ -54,6 +54,8 @@ public class GenerateTerrain : MonoBehaviour
         List<Vector3> vertices = new List<Vector3>();
         //List of triangles
         List<int> triangles = new List<int>();
+        //List of UVs
+        List<Vector2> uvs = new List<Vector2>();
 
         //Loop
 
@@ -87,6 +89,7 @@ public class GenerateTerrain : MonoBehaviour
                 //Debug.Log(vert);
                 //Add the vertex
                 vertices.Add(vert);
+                uvs.Add(new Vector2(x / (float)Segments, y / (float)Segments));
             }
         }
 
@@ -115,6 +118,7 @@ public class GenerateTerrain : MonoBehaviour
         //Assign the vertices and triangles
         mesh.SetVertices(vertices);
         mesh.SetTriangles(triangles, 0);
+        mesh.SetUVs(0, uvs);
         mesh.RecalculateNormals();
 
         //Assign the mesh
