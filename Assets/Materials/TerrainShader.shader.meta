@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b5afdb9f962ca4c4090b224ff028174d
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures:
+  - _PlainTex: {instanceID: 0}
+  - _MountainTex: {instanceID: 0}
+  - _SnowTex: {instanceID: 0}
+  - _WaterTex: {instanceID: 0}
+  - _FlowTex: {instanceID: 0}
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
