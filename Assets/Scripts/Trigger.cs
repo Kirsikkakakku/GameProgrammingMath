@@ -8,11 +8,32 @@ public class Trigger : MonoBehaviour
     [SerializeField] private GameObject player;
     [SerializeField] private GameObject npc;
     [SerializeField] private GameObject lookAt;
+    [SerializeField] private GameObject spotLight;
+    [SerializeField] private GameObject lamp;
 
     [Range(-180, 180)]
     public float AngleThreshold = 30f;
     public float Radius = 4f;
     public float Height = 2f;
+
+    private void Update()
+    {
+        Vector3 playerPos = player.transform.position;
+        Vector3 npcPos = npc.transform.position;
+        Vector3 lookingAt = lookAt.transform.position;
+
+        //Radial trigger
+        if ((playerPos - npcPos).magnitude < Radius)
+        {
+            spotLight.SetActive(true);
+            lamp.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.white);
+        }
+        else
+        {
+            spotLight.SetActive(false);
+            lamp.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.black);
+        }
+    }
 
     private void OnDrawGizmos()
     {
@@ -24,7 +45,7 @@ public class Trigger : MonoBehaviour
         Drawing.DrawVector(Vector3.zero, npcPos - Vector3.zero, Color.white);
 
         //Radial trigger
-        /*if ((playerPos - npcPos).magnitude < Radius)
+        if ((playerPos - npcPos).magnitude < Radius)
         {
             Handles.color = Color.red;
             Handles.DrawWireDisc(npcPos, Vector3.up, Radius);
@@ -35,13 +56,14 @@ public class Trigger : MonoBehaviour
             Handles.color = Color.green;
             Handles.DrawWireDisc(npcPos, Vector3.up, Radius);
             Drawing.DrawVector(npcPos, playerPos - npcPos, Color.green);
-        }*/
+        }
 
         //Handles.DrawWireDisc(npcPos + new Vector3(0, HeightTreshold/2, 0), Vector3.up, Radius);
         //Handles.DrawWireDisc(npcPos - new Vector3(0, HeightTreshold / 2, 0), Vector3.up, Radius);
 
         //Look-at trigger
 
+        /*
         Vector3 lookDir = lookingAt - npcPos;
 
         Vector3 lookVector = Vector3.Normalize(npcPos-lookingAt);
@@ -130,6 +152,6 @@ public class Trigger : MonoBehaviour
         Handles.DrawWireArc(upperMiddle, Vector3.up, lookDir.normalized * Radius, -AngleThreshold, Radius);
 
         Handles.DrawWireArc(lowerMiddle, Vector3.up, lookDir.normalized * Radius, AngleThreshold, Radius);
-        Handles.DrawWireArc(lowerMiddle, Vector3.up, lookDir.normalized * Radius, -AngleThreshold, Radius);
+        Handles.DrawWireArc(lowerMiddle, Vector3.up, lookDir.normalized * Radius, -AngleThreshold, Radius);*/
     }
 }
