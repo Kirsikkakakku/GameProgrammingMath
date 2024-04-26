@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class Trigger : MonoBehaviour
 {
-    [SerializeField] private GameObject player;
-    [SerializeField] private GameObject npc;
+    [SerializeField] private GameObject car;
+    [SerializeField] private GameObject triggerSource;
     [SerializeField] private GameObject lookAt;
     [SerializeField] private GameObject spotLight;
     [SerializeField] private GameObject lamp;
@@ -16,46 +16,47 @@ public class Trigger : MonoBehaviour
     public float Radius = 4f;
     public float Height = 2f;
 
+
     private void Update()
     {
-        Vector3 playerPos = player.transform.position;
-        Vector3 npcPos = npc.transform.position;
-        Vector3 lookingAt = lookAt.transform.position;
+        Vector3 carPos = car.transform.position;
+        Vector3 npcPos = triggerSource.transform.position;
+        //Vector3 lookingAt = lookAt.transform.position;
 
         //Radial trigger
-        if ((playerPos - npcPos).magnitude < Radius)
+        if ((carPos - npcPos).magnitude < Radius)
         {
             spotLight.SetActive(true);
-            lamp.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.white);
+            lamp.GetComponent<Renderer>().materials[1].SetColor("_EmissionColor", new Color(192, 137, 46));
         }
         else
         {
             spotLight.SetActive(false);
-            lamp.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.black);
+            lamp.GetComponent<Renderer>().materials[1].SetColor("_EmissionColor", Color.black);
         }
     }
 
     private void OnDrawGizmos()
     {
-        Vector3 playerPos = player.transform.position;
-        Vector3 npcPos = npc.transform.position;
-        Vector3 lookingAt = lookAt.transform.position;
+        Vector3 carPos = car.transform.position;
+        Vector3 triggerSourcePos = triggerSource.transform.position;
+        //Vector3 lookingAt = lookAt.transform.position;
 
-        Drawing.DrawVector(Vector3.zero, playerPos - Vector3.zero, Color.white);
-        Drawing.DrawVector(Vector3.zero, npcPos - Vector3.zero, Color.white);
+        Drawing.DrawVector(Vector3.zero, carPos - Vector3.zero, Color.white);
+        Drawing.DrawVector(Vector3.zero, triggerSourcePos - Vector3.zero, Color.white);
 
         //Radial trigger
-        if ((playerPos - npcPos).magnitude < Radius)
+        if ((carPos - triggerSourcePos).magnitude < Radius)
         {
             Handles.color = Color.red;
-            Handles.DrawWireDisc(npcPos, Vector3.up, Radius);
-            Drawing.DrawVector(npcPos, playerPos - npcPos, Color.red);
+            Handles.DrawWireDisc(triggerSourcePos, Vector3.up, Radius);
+            Drawing.DrawVector(triggerSourcePos, carPos - triggerSourcePos, Color.red);
         }
         else
         {
             Handles.color = Color.green;
-            Handles.DrawWireDisc(npcPos, Vector3.up, Radius);
-            Drawing.DrawVector(npcPos, playerPos - npcPos, Color.green);
+            Handles.DrawWireDisc(triggerSourcePos, Vector3.up, Radius);
+            Drawing.DrawVector(triggerSourcePos, carPos - triggerSourcePos, Color.green);
         }
 
         //Handles.DrawWireDisc(npcPos + new Vector3(0, HeightTreshold/2, 0), Vector3.up, Radius);
