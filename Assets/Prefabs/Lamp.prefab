@@ -40,7 +40,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7549948414650484779}
-  - component: {fileID: 6448600178712410543}
+  - component: {fileID: 292247829564412756}
   m_Layer: 0
   m_Name: Lamp
   m_TagString: Untagged
@@ -65,7 +65,7 @@ Transform:
   - {fileID: 1869581778146665909}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6448600178712410543
+--- !u!114 &292247829564412756
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -74,17 +74,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 5278190722787960970}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f5670112a8f19214bbadf1334f570f14, type: 3}
+  m_Script: {fileID: 11500000, guid: 52096ceb9d127f6469e6d7f85f298146, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
+  car: {fileID: 0}
   triggerSource: {fileID: 5278190722787960970}
-  lookAt: {fileID: 1748708376399740787}
   spotLight: {fileID: 7567608747879655784}
   lamp: {fileID: 7390811715140611678}
-  AngleThreshold: 50
-  Radius: 4.3
-  Height: 2
+  Radius: 4
 --- !u!1 &7390811715140611678
 GameObject:
   m_ObjectHideFlags: 0
@@ -215,9 +212,9 @@ Light:
   m_Shape: 0
   m_Color: {r: 0.9528302, g: 0.68567413, b: 0.32809716, a: 1}
   m_Intensity: 16
-  m_Range: 7.22
-  m_SpotAngle: 149.8
-  m_InnerSpotAngle: 21.80208
+  m_Range: 6
+  m_SpotAngle: 179
+  m_InnerSpotAngle: 1
   m_CookieSize: 10
   m_Shadows:
     m_Type: 2

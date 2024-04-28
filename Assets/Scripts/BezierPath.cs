@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using System.Linq;
-using UnityEditor.Performance.ProfileAnalyzer;
-using System.Net.NetworkInformation;
+using TMPro;
+using UnityEngine.UI;
 
 public class BezierPath : MonoBehaviour
 {
@@ -15,6 +15,8 @@ public class BezierPath : MonoBehaviour
     [SerializeField] BezierPoint[] points;
     [SerializeField] GameObject obj;
     [SerializeField] GameObject obj1;
+    [SerializeField] TMP_Text sliderValueText;
+    [SerializeField] Slider slider;
 
     [SerializeField] private Mesh mesh;
     [SerializeField] private MeshFilter meshFilter;
@@ -64,6 +66,7 @@ public class BezierPath : MonoBehaviour
         anc2 = points[0].GetSecondControlPoint();
         anc3 = points[1].GetFirstControlPoint();
         anc4 = points[1].GetAnchorPoint();
+        OnSliderValueChanged();
     }
 
     private void Update()
@@ -313,5 +316,11 @@ public class BezierPath : MonoBehaviour
 
         obj.transform.position = point6;
         obj.transform.rotation = rotation;
+    }
+
+    public void OnSliderValueChanged()
+    {
+        sliderValueText.text = slider.value.ToString();
+        lapTime = slider.value;
     }
 }
