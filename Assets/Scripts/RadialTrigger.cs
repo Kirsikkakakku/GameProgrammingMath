@@ -29,7 +29,7 @@ public class RadialTrigger : MonoBehaviour
         }
     }
 
-    /*private void OnDrawGizmos()
+    private void OnDrawGizmos()
     {
         Vector3 carPos = car.transform.position;
         Vector3 triggerSourcePos = triggerSource.transform.position;
@@ -49,5 +49,5 @@ public class RadialTrigger : MonoBehaviour
             Handles.DrawWireDisc(triggerSourcePos, Vector3.up, Radius);
             //Drawing.DrawVector(triggerSourcePos, carPos - triggerSourcePos, Color.green);
         }
-    }*/
+    }
 }

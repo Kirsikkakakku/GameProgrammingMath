@@ -11,7 +11,7 @@ public class WedgeTrigger : MonoBehaviour
     [SerializeField] private GameObject car;
     [SerializeField] private GameObject triggerSource;
     [SerializeField] private GameObject lookAt;
-    [SerializeField] private GameObject turretGun;  
+    [SerializeField] private GameObject camera;  
 
     [Range(-180, 180)]
     public float AngleThreshold = 30f;
@@ -21,14 +21,13 @@ public class WedgeTrigger : MonoBehaviour
 
     private Vector3 originalRot;
     private Vector3 fromRotation;
-    private Vector3 toRotation;
     private float elapsedTime = 0f;
     private bool rotating = false;
     private bool carSeen = false;
 
     private void Awake()
     {
-        originalRot = turretGun.transform.localRotation.eulerAngles;
+        originalRot = camera.transform.localRotation.eulerAngles;
     }
 
     private void Update()
@@ -64,9 +63,21 @@ public class WedgeTrigger : MonoBehaviour
             //If player is within both the radial trigger and the look-at trigger, player is within the wedge
             if (isLooking && withinRadius)
             {
-                Quaternion lookRotation = Quaternion.LookRotation(carPos - turretGun.transform.position, Vector3.up);
-                turretGun.transform.eulerAngles = new Vector3(0, lookRotation.eulerAngles.y, 0);
+                Quaternion lookRotation = Quaternion.LookRotation(carPos - camera.transform.position, Vector3.up);
+                camera.transform.eulerAngles = new Vector3(0, lookRotation.eulerAngles.y, 0);
                 carSeen = true;
+            }
+
+            else
+            {
+                if (carSeen)
+                {
+                    carSeen = false;
+                    rotating = true;
+                    fromRotation = camera.transform.localRotation.eulerAngles;
+                    elapsedTime = 0f;
+                    RotateBack();
+                }
             }
         }
 
@@ -76,7 +87,7 @@ public class WedgeTrigger : MonoBehaviour
             {
                 carSeen = false;
                 rotating = true;
-                fromRotation = turretGun.transform.localRotation.eulerAngles;
+                fromRotation = camera.transform.localRotation.eulerAngles;
                 elapsedTime = 0f;
                 RotateBack();
             }
@@ -101,7 +112,7 @@ public class WedgeTrigger : MonoBehaviour
             if (fromRotation.y > 180) originalRot.y = 360;
 
             float rotValue = rotationEasingFunction(fromRotation.y, originalRot.y, t);
-            turretGun.transform.localEulerAngles = new Vector3(0, rotValue, 0);
+            camera.transform.localEulerAngles = new Vector3(0, rotValue, 0);
         }
     }
 
